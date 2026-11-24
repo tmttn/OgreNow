@@ -11,14 +11,11 @@
 
 local MESSAGE = "IT'S ALL OGRE NOW"
 
-local defaults = { buff = "Ogre Dominance", maxStacks = 20 }
+local BUFF = "Ogre Dominance"
+local MAX_STACKS = 20
 local db
 local isOgre = false
 local pending = false
-
-local function Print(msg)
-    DEFAULT_CHAT_FRAME:AddMessage("|cff88cc44Ogre Now:|r " .. msg)
-end
 
 -- Fallback: read "increased by N" from the buff's tooltip.
 local scanTip
@@ -58,23 +55,19 @@ local function Plain(v)
     return v
 end
 
-local lastScanSecret = false
-
 -- Iterate player buffs: callback(index, name, stacks, value, spellId)
 -- index is the buff's position, used for the tooltip fallback.
 local function ForEachBuff(callback)
-    lastScanSecret = false
     -- In combat the client hides auras; reading them then can error.
     if C_Secrets and C_Secrets.ShouldAurasBeSecret and C_Secrets.ShouldAurasBeSecret() then
-        lastScanSecret = true
         return
     end
     local index = 0
     local function Handle(aura)
-        if not aura or Secret(aura) then lastScanSecret = true; return end
+        if not aura or Secret(aura) then return end
         index = index + 1
         local name = Plain(aura.name)
-        if not name then lastScanSecret = true; return end
+        if not name then return end
         local points = Plain(aura.points)
         local value = points and Plain(points[1])
         callback(index, name, tonumber(Plain(aura.applications)) or 0,
@@ -92,7 +85,7 @@ local function ForEachBuff(callback)
                 for k = 1, slots.n do slots[k] = (select(k, ...)) end
             end
             Pack(C_UnitAuras.GetAuraSlots("player", "HELPFUL", nil, token))
-            if Secret(slots[1]) then lastScanSecret = true; return end
+            if Secret(slots[1]) then return end
             token = slots[1]
             for i = 2, slots.n do
                 local slot = Plain(slots[i])
@@ -146,11 +139,11 @@ local function OgreActive()
     local stacks = 0
     ForEachBuff(function(i, name, count, value, id)
         readable = true
-        if name == db.buff then
+        if name == BUFF then
             seen = true
             if id then db.spellId = id end
             stacks = BuffStacks(i, count, value)
-            if stacks >= db.maxStacks then active = true end
+            if stacks >= MAX_STACKS then active = true end
         end
     end)
     if readable then
@@ -158,7 +151,7 @@ local function OgreActive()
         if stam then baseStamina = stam - stacks end
     else
         local est = EstimatedStacks()
-        if est and est >= db.maxStacks then active = true end
+        if est and est >= MAX_STACKS then active = true end
     end
     -- Fallback: look the buff up directly by its remembered spell ID.
     if not seen and db.spellId and C_UnitAuras and C_UnitAuras.GetPlayerAuraBySpellID then
@@ -167,7 +160,7 @@ local function OgreActive()
             local points = Plain(aura.points)
             local stacks = math.max(tonumber(Plain(aura.applications)) or 0,
                                     tonumber(points and Plain(points[1])) or 0)
-            if stacks >= db.maxStacks then active = true end
+            if stacks >= MAX_STACKS then active = true end
         end
     end
     return active
@@ -304,9 +297,8 @@ f:SetScript("OnEvent", function(_, event, arg1, arg2)
     if event == "ADDON_LOADED" then
         if arg1 ~= "OgreNow" then return end
         OgreNowDB = OgreNowDB or {}
-        for k, v in pairs(defaults) do
-            if OgreNowDB[k] == nil then OgreNowDB[k] = v end
-        end
+        -- the trigger used to be configurable; drop old saved values
+        OgreNowDB.buff, OgreNowDB.maxStacks = nil, nil
         db = OgreNowDB
         return
     end
@@ -333,32 +325,3 @@ f:SetScript("OnEvent", function(_, event, arg1, arg2)
     end
     Update(event)
 end)
-
-SLASH_OGRENOW1 = "/ogre"
-SlashCmdList.OGRENOW = function(input)
-    local cmd, rest = (input or ""):match("^(%S*)%s*(.-)$")
-    cmd = cmd:lower()
-    if cmd == "scan" then
-        Print("Current buffs:")
-        local api = (C_UnitAuras and C_UnitAuras.GetAuraSlots and "GetAuraSlots")
-            or (C_UnitAuras and C_UnitAuras.GetBuffDataByIndex and "GetBuffDataByIndex") or "UnitBuff"
-        local found = 0
-        ForEachBuff(function(i, name, count, value, id)
-            found = found + 1
-            Print(("  %s  (stacks: %d, count: %d, value: %d, id: %s)"):format(
-                name, BuffStacks(i, count, value), count, value, tostring(id)))
-        end)
-        Print(("%d buffs via %s%s."):format(found, api,
-            lastScanSecret and ", some data hidden by the game (secret)" or ""))
-    elseif cmd == "stack" then
-        local count, name = rest:match("^(%d+)%s+(.+)$")
-        if count then
-            db.buff, db.maxStacks = name, tonumber(count)
-        end
-        Print(("Triggers at %d stacks of '%s'."):format(db.maxStacks, db.buff))
-    else
-        Print(("Watching '%s', yells at %d stacks."):format(db.buff, db.maxStacks))
-        Print("/ogre scan - list your buffs with their stacks")
-        Print("/ogre stack <count> <buff name> - change the trigger")
-    end
-end

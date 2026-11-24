@@ -1,3 +1,7 @@
+## 1.0.3
+
+- Removed the /ogre command (and /ogre scan, /ogre stack): the trigger is always 20 stacks of Ogre Dominance
+
 ## 1.0.2
 
 - Removed the /ogre test and /ogre debug commands
