@@ -1,0 +1,5 @@
+package-as: OgreNow
+
+manual-changelog:
+  filename: CHANGELOG.md
+  markup-type: markdown
