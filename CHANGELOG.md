@@ -1,3 +1,7 @@
+## 1.0.2
+
+- Removed the /ogre test and /ogre debug commands
+
 ## 1.0.1
 
 - The CurseForge app can now find and update Ogre Now

@@ -237,7 +237,6 @@ end
 -- add-ons. The ogre form changes your character model, which is still
 -- readable: a hidden model frame reports the player's model file ID.
 -- normalModel is learned whenever you are certainly not an ogre.
-local debug = false
 local normalModel
 local modelFrame = CreateFrame("PlayerModel", nil, UIParent)
 modelFrame:SetSize(1, 1)
@@ -273,16 +272,7 @@ end
 
 local function Update(event)
     local ok, now = pcall(function() return OgreActive() or ModelIsOgre() end)
-    if not ok then
-        if debug then Print(event .. " error: " .. tostring(now)) end
-        return
-    end
-    if debug then
-        Print(("%s: combat %s, model %s (normal %s), stamina %s (base %s, est. stacks %s), toggle %s, ogre=%s"):format(
-            event, tostring(InCombatLockdown()), tostring(CurrentModel()), tostring(normalModel),
-            tostring(Stamina()), tostring(baseStamina), tostring(EstimatedStacks()),
-            tostring(combatToggle), tostring(now)))
-    end
+    if not ok then return end
     if now and not isOgre then Trigger() end
     if not now then
         pending = false
@@ -366,18 +356,9 @@ SlashCmdList.OGRENOW = function(input)
             db.buff, db.maxStacks = name, tonumber(count)
         end
         Print(("Triggers at %d stacks of '%s'."):format(db.maxStacks, db.buff))
-    elseif cmd == "test" then
-        Trigger()
-    elseif cmd == "debug" then
-        debug = not debug
-        LearnNormalModel()
-        Print(("Debug %s. Model now %s, normal %s."):format(debug and "on" or "off",
-            tostring(CurrentModel()), tostring(normalModel)))
     else
         Print(("Watching '%s', yells at %d stacks."):format(db.buff, db.maxStacks))
         Print("/ogre scan - list your buffs with their stacks")
         Print("/ogre stack <count> <buff name> - change the trigger")
-        Print("/ogre test - test the yell")
-        Print("/ogre debug - show model changes in chat")
     end
 end

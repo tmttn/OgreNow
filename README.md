@@ -11,5 +11,3 @@ Outside instances, the game only allows a yell on a key press or click. The yell
 - `/ogre`: show what it is watching
 - `/ogre scan`: list your buffs and their stacks (out of combat)
 - `/ogre stack <count> <buff name>`: change the trigger
-- `/ogre test`: test the yell
-- `/ogre debug`: show model changes in chat
