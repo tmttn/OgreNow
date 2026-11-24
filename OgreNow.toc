@@ -1,0 +1,10 @@
+## Interface: 16001
+## Title: Ogre Now
+## Notes: Yells IT'S ALL OGRE NOW when you turn into an ogre.
+## Author: Tom
+## Version: 1.0.0
+## Category: Chat
+## IconTexture: Interface\AddOns\OgreNow\logo
+## SavedVariables: OgreNowDB
+
+OgreNow.lua
