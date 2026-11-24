@@ -2,7 +2,9 @@
 ## Title: Ogre Now
 ## Notes: Yells IT'S ALL OGRE NOW when you turn into an ogre.
 ## Author: Tom
-## Version: 1.0.0
+## Version: 1.0.1
+## X-Curse-Project-ID: 1829399
+## X-Website: https://github.com/tmttn/OgreNow
 ## Category: Chat
 ## IconTexture: Interface\AddOns\OgreNow\logo
 ## SavedVariables: OgreNowDB

@@ -1,3 +1,7 @@
+## 1.0.1
+
+- The CurseForge app can now find and update Ogre Now
+
 ## 1.0.0 - First release
 
 - Yells "IT'S ALL OGRE NOW" at 20 stacks of Ogre Dominance (Krol'dok Battlegear 5/5)
